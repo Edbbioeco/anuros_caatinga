@@ -22,13 +22,14 @@ tree
 
 tree$tip.label
 
-tree |> ape::plot.phylo(type = "fan",
-                        show.tip.label = TRUE,
-                        edge.color = "blue",
-                        edge.width = 1.5,
-                        tip.color = "black",
-                        cex = 0.45,
-                        label.offset = 0.001)
+ggtree::ggtree(tree, layout = "circular", size = 1) +
+  ggtree::geom_tiplab(color = "black",
+                      size = 3.25,
+                      fontface = "bold.italic",
+                      offset = 14.5)  +
+  ggtree::xlim(0, 300) +
+  ggtree::theme_tree() +
+  ggview::canvas(height = 10, width = 12)
 
 ## Espécies totais ----
 

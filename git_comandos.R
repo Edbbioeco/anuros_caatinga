@@ -12,16 +12,22 @@ gert::git_status() |>
 
 # Adicionando os arquivos ----
 
-gert::git_add(list.files(pattern = "Adicionar espécies faltantes.R"))
+gert::git_add(list.files(pattern = "git_comandos.R"))
 
 # Commitando ----
 
-gert::git_commit("Script para adicionar as espécies faltantes à filogenia")
+gert::git_commit("Script os comandos de Git")
 
 # Pushando ----
 
-gert::git_push(remote = "")
+gert::git_push(remote = "anuros_caatinga")
 
 # Pullando ----
 
+gert::git_pull(remote = "anuros_caatinga")
+
 # Resetando ----
+
+gert::git_reset_mixed()
+
+gert::git_reset_soft(ref = "HEAD")

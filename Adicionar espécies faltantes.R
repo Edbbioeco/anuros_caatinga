@@ -46,7 +46,7 @@ sinonimios |> dplyr::glimpse()
 
 ## Espécies que faltam ----
 
-sps_filo <- tree_cons$tip.label
+sps_filo <- tree$tip.label
 
 sps_filo
 
@@ -62,6 +62,12 @@ novas_especies <- data.frame(especie = sps_faltam |> stringr::str_replace(" ", "
 novas_especies
 
 ## Adicionando ----
+
+tree$tip.label
+
+tree$tip.label |> length()
+
+tree$tip.label[tree$tip.label == "Phyllomedusa_nordestina"] <- "Pithecopus_nordestinus"
 
 tree$tip.label
 
@@ -85,33 +91,61 @@ tree$tip.label
 
 tree$tip.label |> length()
 
+tree |> ape::plot.phylo(type = "fan",
+                        show.tip.label = TRUE,
+                        edge.color = "blue",
+                        edge.width = 1.5,
+                        tip.color = "black",
+                        cex = 0.45,
+                        label.offset = 0.001)
+
 ## Corrigindo o nome das espécies ----
 
-sinonimios <- sinonimios |>
+sinonimios_trat <- sinonimios |>
   dplyr::mutate(Espécie = Espécie |>  stringr::str_replace(" ", "_"),
+                Sinonímio = dplyr::if_else(Sinonímio == "Phyllomedusa nordestina",
+                                           "Pithecopus nordestinus",
+                                           Sinonímio),
                 Sinonímio = Sinonímio |> stringr::str_replace(" ", "_"),
                 Sinonímio = Sinonímio |> factor(levels = tree$tip.label)) |>
+  as.data.frame() |>
   dplyr::arrange(Sinonímio)
 
-sinonimios$Sinonímio
+sinonimios_trat
 
-sinonimios$Espécie
+sps_dif_filo <- sinonimios_trat$Sinonímio |> setdiff(sinonimios_trat$Espécie)
 
-tree$tip.label
+sps_dif_filo
+
+sps_corrigir <- sinonimios_trat$Espécie |> setdiff(tree$tip.label)
+
+sps_corrigir
+
+sps_filo <- tree$tip.label
+
+sps_filo
 
 corrigir_tax <- function(id){
 
-  if(tree$tip.label[id] != sinonimios$Espécie[id]){
-
-    tree$tip.label[id] <<- sinonimios$Espécie[id]
-
-  }
+  sps_filo <<- data.frame(sps_filo) |>
+    dplyr::mutate(sps_filo = dplyr::case_when(
+      sps_filo == sps_dif_filo[id] ~ sps_corrigir[id],
+      .default = sps_filo)) |>
+    dplyr::pull(sps_filo)
 
 }
 
-id <- 1:length(tree$tip.label)
+id <- 1:length(sps_corrigir)
+
+id
 
 purrr::map(id, corrigir_tax)
+
+sps_filo
+
+tree$tip.label <- sps_filo
+
+tree$tip.label
 
 ## Visualizando ----
 
@@ -121,7 +155,8 @@ ggtree::ggtree(tree, layout = "circular", size = 1) +
                       fontface = "bold.italic",
                       offset = 14.5)  +
   ggtree::xlim(0, 300) +
-  ggtree::theme_tree()
+  ggtree::theme_tree() +
+  ggview::canvas(height = 10, width = 12)
 
 # Exportando ----
 
